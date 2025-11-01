@@ -1,0 +1,45 @@
+# Build artifacts (intermediate files)
+build/*.o
+build/*.obj
+build/CMakeFiles/
+build/CMakeCache.txt
+build/cmake_install.cmake
+build/Makefile
+
+# Allow final executables (for easy download)
+!build/*.exe
+
+# IDE files
+.vscode/
+.vs/
+*.suo
+*.user
+*.sln.docstates
+
+# Compiled files (except our final executables in build/)
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+
+# Ignore .exe files everywhere except in build/ folder
+*.exe
+!build/RemoteServer.exe
+!build/RemoteClient.exe
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+# Scoop installation
+scoop/
+install_scoop.ps1
