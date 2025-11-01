@@ -21,6 +21,7 @@ add_executable(RemoteServer
     ${COMMON_SOURCES}
     src/server/screen_capture.cpp
     src/server/server.cpp
+    src/server/input_injector.cpp
     src/main_server.cpp
 )
 
@@ -29,6 +30,7 @@ add_executable(RemoteClient
     ${COMMON_SOURCES}
     src/client/client.cpp
     src/client/renderer.cpp
+    src/client/input_handler.cpp
     src/main_client.cpp
 )
 

@@ -144,7 +144,10 @@ bool NetworkSocket::Receive(void* buffer, size_t size) {
 }
 
 bool NetworkSocket::ReceiveExact(void* buffer, size_t size) {
-    if (!IsValid()) return false;
+    if (!IsValid()) {
+        std::cerr << "ReceiveExact: Socket is not valid" << std::endl;
+        return false;
+    }
 
     char* ptr = static_cast<char*>(buffer);
     size_t totalReceived = 0;
@@ -152,14 +155,44 @@ bool NetworkSocket::ReceiveExact(void* buffer, size_t size) {
     while (totalReceived < size) {
         int received = recv(socket_, ptr + totalReceived, 
                           static_cast<int>(size - totalReceived), 0);
-        if (received == SOCKET_ERROR || received == 0) {
-            std::cerr << "ReceiveExact failed: " << WSAGetLastError() << std::endl;
+        if (received == SOCKET_ERROR) {
+            int error = WSAGetLastError();
+            std::cerr << "ReceiveExact failed: WSA Error " << error;
+            if (error == WSAECONNRESET) {
+                std::cerr << " (Connection reset by peer)" << std::endl;
+            } else if (error == WSAETIMEDOUT) {
+                std::cerr << " (Connection timed out)" << std::endl;
+            } else if (error == WSAECONNABORTED) {
+                std::cerr << " (Connection aborted)" << std::endl;
+            } else {
+                std::cerr << std::endl;
+            }
+            return false;
+        }
+        if (received == 0) {
+            std::cerr << "ReceiveExact: Connection closed by peer (received 0 bytes, expected " 
+                      << size << " bytes, got " << totalReceived << " bytes)" << std::endl;
             return false;
         }
         totalReceived += received;
     }
 
     return true;
+}
+
+bool NetworkSocket::HasData(int timeoutMs) {
+    if (!IsValid()) return false;
+
+    fd_set readSet;
+    FD_ZERO(&readSet);
+    FD_SET(socket_, &readSet);
+
+    timeval timeout;
+    timeout.tv_sec = timeoutMs / 1000;
+    timeout.tv_usec = (timeoutMs % 1000) * 1000;
+
+    int result = select(0, &readSet, NULL, NULL, &timeout);
+    return result > 0;
 }
 
 void NetworkSocket::Close() {

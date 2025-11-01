@@ -1,6 +1,7 @@
 #pragma once
 #include "common/network.h"
 #include "server/screen_capture.h"
+#include "server/input_injector.h"
 #include <memory>
 #include <atomic>
 #include <thread>
@@ -26,9 +27,11 @@ private:
     void HandleClient(std::unique_ptr<NetworkSocket> clientSocket);
     
     bool SendScreenFrame(NetworkSocket* socket);
+    bool ReceiveAndProcessInput(NetworkSocket* socket);
 
     std::unique_ptr<NetworkSocket> serverSocket_;
     std::unique_ptr<ScreenCapture> screenCapture_;
+    std::unique_ptr<InputInjector> inputInjector_;
     
     std::atomic<bool> running_;
     std::thread serverThread_;

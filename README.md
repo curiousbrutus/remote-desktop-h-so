@@ -2,8 +2,9 @@
 
 [![Platform](https://img.shields.io/badge/Platform-Windows-blue.svg)](https://www.microsoft.com/windows)
 [![Language](https://img.shields.io/badge/Language-C%2B%2B17-orange.svg)](https://isocpp.org/)
-[![License](https://img.shields.io/badge/License-Educational-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](build/)
+[![Downloads](https://img.shields.io/badge/Download-.exe-blue.svg)](https://github.com/curiousbrutus/remote-desktop-h-so/tree/master/build)
 
 **Tam özellikli Windows remote desktop uygulaması** - Gerçek zamanlı ekran paylaşımı, JPEG sıkıştırma, TCP/IP streaming ile C++ ile yazılmış native uygulama.
 
@@ -237,10 +238,18 @@ Katkılarınızı bekliyoruz!
 
 ## 📄 Lisans
 
-Bu proje **eğitim amaçlıdır**. 
-- ✅ Öğrenmek ve geliştirmek için özgürce kullanabilirsiniz
-- ⚠️ Prodüksiyon kullanımı için TLS/şifreleme eklemeniz önerilir
-- ⚠️ Ticari kullanım için uygun lisans ekleyin
+Bu proje **MIT License** altında lisanslanmıştır - Detaylar için [LICENSE](LICENSE) dosyasına bakın.
+
+**Özgürce kullanabilirsiniz:**
+- ✅ Ticari ve kişisel projelerinizde
+- ✅ Modifiye edip dağıtabilirsiniz
+- ✅ Açık kaynak veya kapalı kaynak projelerde
+
+**⚠️ GÜVENLİK UYARISI:**
+- Bu yazılım EĞİTİM AMAÇLIDIR
+- Prodüksiyon kullanımı için TLS/SSL şifreleme ekleyin
+- Kimlik doğrulama ve yetkilendirme implementasyonu gereklidir
+- Mevcut sürümde şifreleme YOK - Plain text veri iletimi
 
 ## 📞 İletişim
 

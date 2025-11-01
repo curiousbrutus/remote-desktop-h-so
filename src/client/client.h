@@ -1,5 +1,6 @@
 #pragma once
 #include "common/network.h"
+#include "common/protocol.h"
 #include <memory>
 #include <atomic>
 #include <thread>
@@ -31,6 +32,10 @@ public:
     void SetFrameCallback(FrameCallback callback) { 
         frameCallback_ = callback; 
     }
+    
+    // Send input events to server
+    bool SendMouseEvent(const MouseEventData& event);
+    bool SendKeyboardEvent(const KeyboardEventData& event);
 
 private:
     void ReceiveLoop();

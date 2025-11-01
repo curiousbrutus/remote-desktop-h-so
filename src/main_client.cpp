@@ -2,6 +2,7 @@
 #include "common/protocol.h"
 #include "client/client.h"
 #include "client/renderer.h"
+#include "client/input_handler.h"
 #include <iostream>
 #include <string>
 
@@ -10,14 +11,44 @@ using namespace RemoteDesktop;
 // Global variables
 static Client* g_client = nullptr;
 static Renderer* g_renderer = nullptr;
+static InputHandler* g_inputHandler = nullptr;
 static HWND g_hwnd = nullptr;
+static bool g_inputCaptureEnabled = false;
 
 // Window procedure
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    // Handle input events first
+    if (g_inputHandler && g_inputHandler->HandleMessage(uMsg, wParam, lParam)) {
+        return 0; // Event was handled
+    }
+    
     switch (uMsg) {
         case WM_DESTROY:
             PostQuitMessage(0);
             return 0;
+        
+        case WM_KEYDOWN: {
+            // F1 to toggle input capture
+            if (wParam == VK_F1) {
+                g_inputCaptureEnabled = !g_inputCaptureEnabled;
+                if (g_inputHandler) {
+                    g_inputHandler->SetCaptureEnabled(g_inputCaptureEnabled);
+                }
+                std::cout << "[CLIENT] Input capture " 
+                          << (g_inputCaptureEnabled ? "ENABLED" : "DISABLED") 
+                          << " (Press F1 to toggle)" << std::endl;
+                
+                // Update window title
+                std::wstring title = L"Remote Desktop Client";
+                if (g_inputCaptureEnabled) {
+                    title += L" - [CONTROLLING] Press F1 to release";
+                } else {
+                    title += L" - [VIEW ONLY] Press F1 to control";
+                }
+                SetWindowTextW(hwnd, title.c_str());
+            }
+            break;
+        }
 
         case WM_PAINT: {
             PAINTSTRUCT ps;
@@ -52,6 +83,20 @@ void OnFrameReceived(const std::vector<uint8_t>& bgraData,
                      uint32_t width, uint32_t height) {
     if (g_renderer) {
         g_renderer->UpdateFrame(bgraData, width, height);
+    }
+}
+
+// Mouse event callback
+void OnMouseEvent(const MouseEventData& event) {
+    if (g_client) {
+        g_client->SendMouseEvent(event);
+    }
+}
+
+// Keyboard event callback
+void OnKeyboardEvent(const KeyboardEventData& event) {
+    if (g_client) {
+        g_client->SendKeyboardEvent(event);
     }
 }
 
@@ -122,6 +167,17 @@ int main(int argc, char* argv[]) {
         NetworkSocket::CleanupWinsock();
         return 1;
     }
+
+    // Initialize input handler
+    InputHandler inputHandler(g_hwnd);
+    g_inputHandler = &inputHandler;
+    inputHandler.SetMouseCallback(OnMouseEvent);
+    inputHandler.SetKeyboardCallback(OnKeyboardEvent);
+    
+    std::cout << "\n========================================" << std::endl;
+    std::cout << "Press F1 to toggle input capture" << std::endl;
+    std::cout << "View Only mode by default" << std::endl;
+    std::cout << "========================================\n" << std::endl;
 
     // Create and connect client
     Client client;

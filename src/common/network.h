@@ -33,6 +33,9 @@ public:
     bool IsValid() const { return socket_ != INVALID_SOCKET; }
     void Close();
     
+    // Check if data is available (non-blocking)
+    bool HasData(int timeoutMs = 0);
+    
     std::string GetRemoteAddress() const;
     uint16_t GetRemotePort() const;
 
