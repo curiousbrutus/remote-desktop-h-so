@@ -36,13 +36,22 @@ Sadece `.exe` dosyalarını indirmek isterseniz:
 
 ## ✨ Özellikler
 
-- ✅ **Gerçek zamanlı ekran paylaşımı** - 30 FPS
+**🎮 Remote Control (YENİ!)**
+- ✅ **Mouse kontrolü** - Hareket, tıklama, sağ/sol/orta tuş, scroll
+- ✅ **Keyboard kontrolü** - Tüm tuşlar (harfler, rakamlar, özel tuşlar)
+- ✅ **F1 toggle** - Kontrol modunu güvenle aç/kapa
+- ✅ **View-only mod** - Varsayılan güvenli mod
+
+**📺 Ekran Paylaşımı**
+- ✅ **Gerçek zamanlı stream** - 30 FPS
 - ✅ **JPEG sıkıştırma** - %70-80 veri tasarrufu
 - ✅ **TCP/IP streaming** - Güvenilir veri aktarımı
-- ✅ **Win32 GUI** - Native Windows uygulaması
 - ✅ **Otomatik ölçeklendirme** - Pencere boyutuna uyum
-- ✅ **Çoklu monitör desteği** - Primary monitor
+
+**💻 Platform**
+- ✅ **Win32 GUI** - Native Windows uygulaması
 - ✅ **Bağımlılık yok** - Statik linklenmiş
+- ✅ **Detaylı logging** - Debug ve monitoring
 
 ## 📋 Gereksinimler
 
@@ -207,17 +216,22 @@ Windows Defender Firewall'da port 5900'ü açın.
 
 ## 🚀 Yol Haritası
 
-### Mevcut Sürüm (v1.0)
+### Mevcut Sürüm (v1.1) ✨ NEW!
 - ✅ Screen capture (GDI BitBlt)
 - ✅ JPEG compression
 - ✅ TCP streaming
 - ✅ Client GUI
+- ✅ **Mouse remote control** 🎉
+- ✅ **Keyboard remote control** 🎉
+- ✅ **F1 toggle control** 🎉
+- ✅ **Enhanced logging** 🎉
 
 ### Gelecek Sürümler
-- ⏳ **v1.1:** Mouse/Keyboard remote control
 - ⏳ **v1.2:** DXGI Desktop Duplication (2-3x faster)
+- ⏳ **v1.3:** Clipboard sharing
 - ⏳ **v2.0:** H.264 video codec
 - ⏳ **v2.1:** TLS/SSL encryption
+- ⏳ **v2.2:** File transfer
 - ⏳ **v3.0:** Linux support
 
 ## 🤝 Katkıda Bulunma

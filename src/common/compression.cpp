@@ -9,6 +9,35 @@ using namespace Gdiplus;
 
 namespace RemoteDesktop {
 
+// Global GDI+ initialization
+static ULONG_PTR g_gdiplusToken = 0;
+static int g_gdiplusRefCount = 0;
+
+static bool InitializeGdiPlus() {
+    if (g_gdiplusRefCount++ > 0) {
+        return true; // Already initialized
+    }
+    
+    GdiplusStartupInput gdiplusStartupInput;
+    Status status = GdiplusStartup(&g_gdiplusToken, &gdiplusStartupInput, NULL);
+    if (status != Ok) {
+        std::cerr << "[COMPRESSION] Failed to initialize GDI+: " << status << std::endl;
+        g_gdiplusRefCount--;
+        return false;
+    }
+    
+    std::cout << "[COMPRESSION] GDI+ initialized successfully" << std::endl;
+    return true;
+}
+
+static void ShutdownGdiPlus() {
+    if (--g_gdiplusRefCount <= 0) {
+        GdiplusShutdown(g_gdiplusToken);
+        g_gdiplusRefCount = 0;
+        std::cout << "[COMPRESSION] GDI+ shutdown" << std::endl;
+    }
+}
+
 // GDI+ encoder/decoder helper
 static int GetEncoderClsid(const WCHAR* format, CLSID* pClsid) {
     UINT num = 0;
@@ -41,18 +70,23 @@ bool Compression::CompressToJPEG(
     uint32_t quality,
     std::vector<uint8_t>& outJpegData)
 {
-    // Initialize GDI+
-    GdiplusStartupInput gdiplusStartupInput;
-    ULONG_PTR gdiplusToken;
-    GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+    // Initialize GDI+ (only once)
+    if (!InitializeGdiPlus()) {
+        return false;
+    }
 
     // Create bitmap from raw data
     Bitmap bitmap(width, height, width * 4, PixelFormat32bppARGB, (BYTE*)bgraData);
+    
+    if (bitmap.GetLastStatus() != Ok) {
+        std::cerr << "[COMPRESSION] Failed to create bitmap: " << bitmap.GetLastStatus() << std::endl;
+        return false;
+    }
 
     // Get JPEG encoder
     CLSID jpegClsid;
     if (GetEncoderClsid(L"image/jpeg", &jpegClsid) < 0) {
-        GdiplusShutdown(gdiplusToken);
+        std::cerr << "[COMPRESSION] Failed to get JPEG encoder" << std::endl;
         return false;
     }
 
@@ -71,8 +105,8 @@ bool Compression::CompressToJPEG(
     Status status = bitmap.Save(stream, &jpegClsid, &encoderParams);
     
     if (status != Ok) {
+        std::cerr << "[COMPRESSION] Failed to save bitmap to stream: " << status << std::endl;
         stream->Release();
-        GdiplusShutdown(gdiplusToken);
         return false;
     }
 
@@ -90,9 +124,13 @@ bool Compression::CompressToJPEG(
     stream->Read(outJpegData.data(), dataSize, &bytesRead);
 
     stream->Release();
-    GdiplusShutdown(gdiplusToken);
 
-    return bytesRead == dataSize;
+    if (bytesRead != dataSize) {
+        std::cerr << "[COMPRESSION] Incomplete read: got " << bytesRead << " bytes, expected " << dataSize << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 bool Compression::DecompressFromJPEG(
@@ -102,15 +140,15 @@ bool Compression::DecompressFromJPEG(
     uint32_t& outWidth,
     uint32_t& outHeight)
 {
-    // Initialize GDI+
-    GdiplusStartupInput gdiplusStartupInput;
-    ULONG_PTR gdiplusToken;
-    GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+    // Initialize GDI+ (only once)
+    if (!InitializeGdiPlus()) {
+        return false;
+    }
 
     // Create stream from JPEG data
     HGLOBAL hMem = GlobalAlloc(GMEM_MOVEABLE, jpegSize);
     if (!hMem) {
-        GdiplusShutdown(gdiplusToken);
+        std::cerr << "[COMPRESSION] Failed to allocate memory for JPEG stream" << std::endl;
         return false;
     }
 
@@ -126,8 +164,12 @@ bool Compression::DecompressFromJPEG(
     stream->Release();
 
     if (!bitmap || bitmap->GetLastStatus() != Ok) {
+        std::cerr << "[COMPRESSION] Failed to load bitmap from stream";
+        if (bitmap) {
+            std::cerr << ": " << bitmap->GetLastStatus();
+        }
+        std::cerr << std::endl;
         delete bitmap;
-        GdiplusShutdown(gdiplusToken);
         return false;
     }
 
@@ -139,8 +181,8 @@ bool Compression::DecompressFromJPEG(
     Rect rect(0, 0, outWidth, outHeight);
     
     if (bitmap->LockBits(&rect, ImageLockModeRead, PixelFormat32bppARGB, &bitmapData) != Ok) {
+        std::cerr << "[COMPRESSION] Failed to lock bitmap bits" << std::endl;
         delete bitmap;
-        GdiplusShutdown(gdiplusToken);
         return false;
     }
 
@@ -151,7 +193,6 @@ bool Compression::DecompressFromJPEG(
 
     bitmap->UnlockBits(&bitmapData);
     delete bitmap;
-    GdiplusShutdown(gdiplusToken);
 
     return true;
 }

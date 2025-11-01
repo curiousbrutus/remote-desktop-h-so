@@ -42,6 +42,13 @@ veya
 - 30 FPS hedef hız
 - JPEG sıkıştırma ile ~70-80% veri tasarrufu
 
+**🎮 Remote Control Nasıl Kullanılır:**
+- **F1** tuşuna basın = Kontrol modunu aç/kapa
+- **View Only** mod (varsayılan) = Sadece izle, müdahale etme
+- **Controlling** mod (F1'den sonra) = Mouse/keyboard kontrolü aktif
+- Pencere başlığı: Mevcut modu gösterir
+- Güvenlik için varsayılan VIEW ONLY!
+
 ## 🌐 Farklı Bilgisayarlar Arası Kullanım
 
 ### Server Bilgisayarda (Ekranı paylaşılacak):
